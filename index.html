@@ -100,7 +100,8 @@
   .np-volume-row input[type="range"]::-webkit-slider-thumb{ -webkit-appearance:none; appearance:none; width:12px; height:12px; border-radius:50%; background: var(--brass); cursor:pointer; }
   .np-volume-row input[type="range"]::-moz-range-thumb{ width:12px; height:12px; border-radius:50%; background: var(--brass); border:none; cursor:pointer; }
 
-  .playlist{ max-width:640px; margin: 10px auto 0 auto; padding: 0 20px; display:none; flex-direction:column; gap:8px; }
+  .playlist{ max-width:640px; margin: 10px auto 0 auto; padding: 0 20px; display:flex; flex-direction:column; gap:8px; }
+  .playlist.collapsed{ display:none; }
   .playlist.visible{ display:flex; }
   .empty-state{ text-align:center; color: rgba(245,230,200,0.45); font-family:'Amiri', serif; font-style:italic; padding: 30px 10px; border:1px dashed rgba(245,230,200,0.15); border-radius: var(--radius); }
   .track{ display:flex; align-items:center; gap:12px; background: var(--panel); border:1px solid transparent; border-radius:10px; padding:8px 10px; cursor:pointer; transition: border-color 0.15s ease, background 0.15s ease; }
@@ -204,7 +205,7 @@
     <button id="playPauseBtn" class="play-pause" aria-label="Play or pause">▶</button>
     <button id="nextBtn" aria-label="Next">⏭</button>
     <button id="repeatBtn" aria-label="Repeat">🔁</button>
-    <button id="queueToggleBtn" class="queue-toggle" aria-label="Toggle queue">☰</button>
+    <button id="queueToggleBtn" class="queue-toggle open" aria-label="Toggle queue">☰</button>
   </div>
 </div>
 
@@ -285,7 +286,7 @@
   let player = null;
   let playerReady = false;
   let isPlaying = false;
-  let queueOpen = false;
+  let queueOpen = true;
   let shuffleOn = false;
   let repeatMode = 'off'; // 'off' | 'all' | 'one'
 
@@ -446,7 +447,7 @@
 
   queueToggleBtn.addEventListener('click', () => {
     queueOpen = !queueOpen;
-    playlistEl.classList.toggle('visible', queueOpen);
+    playlistEl.classList.toggle('collapsed', !queueOpen);
     queueToggleBtn.classList.toggle('open', queueOpen);
   });
 
