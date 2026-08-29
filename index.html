@@ -168,14 +168,33 @@
   #ytPlayerHidden{ position:absolute; width:1px; height:1px; overflow:hidden; opacity:0; pointer-events:none; }
 
   @media (max-width: 900px){
-    .g-content{ grid-template-columns:1fr; grid-template-rows:auto auto 1fr auto; padding:22px 22px 18px; gap:14px; }
-    .g-header{ grid-column:1; }
-    .g-nav{ grid-row:2; grid-column:1; flex-direction:row; flex-wrap:wrap; max-height:none; }
-    .g-panel{ grid-row:3; grid-column:1; }
-    .g-transport{ grid-row:4; grid-column:1; flex-wrap:wrap; gap:14px; }
-    .g-title{ font-size:34px; }
-    .g-tagline{ font-size:14px; }
-    .g-disc-wrap{ width:min(50vh,70vw); height:min(50vh,70vw); }
+    .g-content{ grid-template-columns:1fr; grid-template-rows:auto auto 1fr auto; padding:18px 16px 14px; gap:12px; min-width:0; }
+    .g-header{ grid-column:1; min-width:0; }
+    .g-title{ font-size:30px; }
+    .g-tagline{ font-size:13px; }
+    .g-nav{ grid-row:2; grid-column:1; flex-direction:row; flex-wrap:wrap; max-height:none; min-width:0; }
+    .g-panel{ grid-row:3; grid-column:1; min-width:0; }
+    .g-panel-body{ height:auto; }
+    .g-stack{ position:relative; display:flex; opacity:1 !important; transform:none !important; pointer-events:auto !important; }
+    .g-tracklist{ position:relative; display:none; opacity:1 !important; transform:none !important; pointer-events:auto !important; height:220px; }
+    .g-panel-body.expanded .g-stack{ display:none; }
+    .g-panel-body.expanded .g-tracklist{ display:flex; }
+    .g-disc-wrap{ width:min(42vh,58vw); height:min(42vh,58vw); }
+
+    .g-transport{ grid-row:4; grid-column:1; flex-wrap:wrap; gap:12px; min-width:0; padding-top:16px; }
+    .g-controls{ order:1; }
+    .g-nowplaying{ order:2; width:auto; max-width:150px; }
+    .g-progress-wrap{ order:4; flex:1 1 100%; min-width:0; }
+    .g-needle{ flex:1 1 auto; width:100%; min-width:0; height:14px; }
+    .g-elapsed{ flex-shrink:0; }
+    .g-volume{ order:3; margin-left:0; }
+  }
+  @media (max-width: 480px){
+    .g-nav-item span:not(.g-nav-dash){ font-size:10px; }
+    .g-nowplaying{ max-width:110px; }
+    .g-controls{ gap:8px; }
+    .g-btn-round{ width:34px; height:34px; }
+    .g-btn-play{ width:48px; height:48px; }
   }
 </style>
 </head>
