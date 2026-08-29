@@ -82,7 +82,17 @@
   .g-panel-head{ display:flex; align-items:baseline; justify-content:space-between; padding:0 4px 14px; }
   .g-panel-name{ font-size:10px; letter-spacing:.26em; text-transform:uppercase; color:#C9A227; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:220px; }
   .g-panel-count{ font-size:10px; letter-spacing:.2em; text-transform:uppercase; color:rgba(245,230,200,.4); white-space:nowrap; }
-  .g-tracklist{ display:flex; flex-direction:column; gap:1px; overflow-y:auto; padding:8px; background:rgba(10,10,17,.5); backdrop-filter:blur(9px); border-radius:2px; max-height:56vh; scrollbar-width:thin; scrollbar-color:#C9A227 rgba(245,230,200,.06); }
+  .g-tracklist{ display:flex; flex-direction:column; gap:1px; overflow-y:auto; padding:8px; background:rgba(10,10,17,.5); backdrop-filter:blur(9px); border-radius:2px; max-height:56vh; scrollbar-width:thin; scrollbar-color:#C9A227 rgba(245,230,200,.06);
+    opacity:1; transition:opacity .25s ease; }
+  .g-tracklist.collapsed{ display:none; opacity:0; }
+
+  .g-stack{ width:100%; border:none; background:transparent; cursor:pointer; padding:10px 0 4px; display:flex; flex-direction:column; align-items:center; gap:8px; transition:opacity .2s ease, transform .2s ease; }
+  .g-stack:hover{ opacity:.85; }
+  .g-stack:hover ellipse:last-of-type{ filter:brightness(1.15); }
+  .g-stack.hidden{ display:none; }
+  .g-stack-hint{ font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:rgba(245,230,200,.42); }
+  #stackChevron{ transition: transform .25s ease; transform-origin:130px 130px; }
+  .g-stack.open #stackChevron{ transform: rotate(180deg); }
   .g-tracklist::-webkit-scrollbar{ width:7px; }
   .g-tracklist::-webkit-scrollbar-track{ background:rgba(245,230,200,.06); border-radius:4px; }
   .g-tracklist::-webkit-scrollbar-thumb{ background:linear-gradient(180deg, #C9A227, #8B2635); border-radius:4px; border:1px solid rgba(18,19,31,.4); }
@@ -135,8 +145,8 @@
   .g-nowplaying-title{ font-family:'Amiri',serif; font-size:20px; line-height:1.5; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
 
   .g-progress-wrap{ flex:1 1 auto; display:flex; align-items:center; gap:16px; min-width:0; }
-  .g-progress-track{ flex:1 1 auto; height:3px; border-radius:2px; background:rgba(245,230,200,.14); cursor:pointer; }
-  .g-progress-fill{ height:100%; border-radius:2px; background:linear-gradient(90deg, #8B2635, #C9A227); width:0%; }
+  .g-needle{ flex:1 1 auto; width:100%; height:22px; cursor:pointer; overflow:visible; }
+  #progressBead{ transition: cx 0.15s linear; }
   .g-elapsed{ font-size:11px; color:rgba(245,230,200,.44); font-variant-numeric:tabular-nums; white-space:nowrap; }
 
   .g-volume{ display:flex; align-items:center; gap:9px; flex-shrink:0; }
@@ -209,11 +219,31 @@
     </div>
 
     <div class="g-panel">
-      <div class="g-panel-head">
+      <div class="g-panel-head" id="panelToggle">
         <span class="g-panel-name" id="panelName">No playlist yet</span>
         <span class="g-panel-count" id="panelCount"></span>
       </div>
-      <div class="g-tracklist" id="trackList">
+      <button type="button" class="g-stack" id="recordStack" aria-label="Show track list">
+        <svg viewBox="0 0 260 160" width="100%" height="140">
+          <defs>
+            <linearGradient id="stackEdge" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#3a3648"/>
+              <stop offset="100%" stop-color="#141420"/>
+            </linearGradient>
+          </defs>
+          <g transform="translate(130,58)">
+            <ellipse cx="0" cy="36" rx="70" ry="18" fill="url(#stackEdge)"/>
+            <ellipse cx="0" cy="24" rx="70" ry="18" fill="url(#stackEdge)"/>
+            <ellipse cx="0" cy="12" rx="70" ry="18" fill="url(#stackEdge)"/>
+            <ellipse cx="0" cy="0" rx="70" ry="18" fill="#1c1b26" stroke="#3a3648" stroke-width="1"/>
+            <ellipse cx="0" cy="0" rx="22" ry="6" fill="#8B2635"/>
+            <circle cx="0" cy="0" r="2.5" fill="#12131F"/>
+          </g>
+          <path id="stackChevron" d="M118,128 L130,138 L142,128" fill="none" stroke="#C9A227" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <span class="g-stack-hint">Tap to browse tracks</span>
+      </button>
+      <div class="g-tracklist collapsed" id="trackList">
         <div class="g-empty">Add a playlist to begin.</div>
       </div>
     </div>
@@ -236,7 +266,29 @@
         <span class="g-nowplaying-title" id="nowTitle">&mdash;</span>
       </div>
       <div class="g-progress-wrap">
-        <div class="g-progress-track" id="progressTrack"><div class="g-progress-fill" id="progressFill"></div></div>
+        <svg class="g-needle" id="progressTrack" viewBox="0 0 1000 40" preserveAspectRatio="none">
+          <defs>
+            <linearGradient id="steelGrad" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#E8E8EC"/>
+              <stop offset="35%" stop-color="#9C9CA6"/>
+              <stop offset="55%" stop-color="#6B6B74"/>
+              <stop offset="100%" stop-color="#38383E"/>
+            </linearGradient>
+            <linearGradient id="brassGrad" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#F0DFA0"/>
+              <stop offset="45%" stop-color="#C9A227"/>
+              <stop offset="100%" stop-color="#6E4E14"/>
+            </linearGradient>
+            <clipPath id="needleClip"><rect id="needleClipRect" x="0" y="0" width="0" height="40"/></clipPath>
+          </defs>
+          <circle cx="35" cy="20" r="13" fill="none" stroke="url(#steelGrad)" stroke-width="7"/>
+          <path d="M35,17 L955,15 L990,20 L955,25 L35,23 Z" fill="url(#steelGrad)"/>
+          <g clip-path="url(#needleClip)">
+            <circle cx="35" cy="20" r="13" fill="none" stroke="url(#brassGrad)" stroke-width="7"/>
+            <path d="M35,17 L955,15 L990,20 L955,25 L35,23 Z" fill="url(#brassGrad)"/>
+          </g>
+          <circle id="progressBead" cx="35" cy="20" r="9" fill="#F0DFA0" stroke="#12131F" stroke-width="1.5"/>
+        </svg>
         <span class="g-elapsed" id="elapsedTime">0:00 / 0:00</span>
       </div>
       <div class="g-volume">
@@ -278,6 +330,8 @@
   const panelName = document.getElementById('panelName');
   const panelCount = document.getElementById('panelCount');
   const trackListEl = document.getElementById('trackList');
+  const panelToggle = document.getElementById('panelToggle');
+  const recordStack = document.getElementById('recordStack');
   const shuffleBtn = document.getElementById('shuffleBtn');
   const repeatBtn = document.getElementById('repeatBtn');
   const prevBtn = document.getElementById('prevBtn');
@@ -286,7 +340,8 @@
   const statusLabel = document.getElementById('statusLabel');
   const nowTitle = document.getElementById('nowTitle');
   const progressTrack = document.getElementById('progressTrack');
-  const progressFill = document.getElementById('progressFill');
+  const needleClipRect = document.getElementById('needleClipRect');
+  const progressBead = document.getElementById('progressBead');
   const elapsedTime = document.getElementById('elapsedTime');
   const volumeBars = document.getElementById('volumeBars');
 
@@ -416,6 +471,7 @@
   }
 
   async function loadActivePlaylist(){
+    setPanelExpanded(false);
     if(playlists.length === 0){
       panelName.textContent = 'No playlist yet';
       panelCount.textContent = '';
@@ -452,6 +508,16 @@
       trackListEl.innerHTML = '<div class="g-empty">Could not load this playlist. Check the API key and that it is public/unlisted.</div>';
     }
   }
+
+  let panelExpanded = false;
+  function setPanelExpanded(expanded){
+    panelExpanded = expanded;
+    trackListEl.classList.toggle('collapsed', !expanded);
+    recordStack.classList.toggle('open', expanded);
+    recordStack.classList.toggle('hidden', expanded);
+  }
+  panelToggle.addEventListener('click', () => setPanelExpanded(!panelExpanded));
+  recordStack.addEventListener('click', () => setPanelExpanded(!panelExpanded));
 
   function renderTrackList(){
     trackListEl.innerHTML = '';
@@ -584,13 +650,20 @@
     else if(e.code === 'ArrowLeft'){ goPrev(); }
   });
 
+  const NEEDLE_START = 35, NEEDLE_END = 990;
+  function setNeedleProgress(ratio){
+    ratio = Math.max(0, Math.min(1, ratio));
+    needleClipRect.setAttribute('width', (ratio * 1000).toFixed(1));
+    progressBead.setAttribute('cx', (NEEDLE_START + ratio * (NEEDLE_END - NEEDLE_START)).toFixed(1));
+  }
+
   setInterval(() => {
     if(!player || !player.getCurrentTime || currentIndex === -1) return;
     try{
       const cur = player.getCurrentTime();
       const dur = player.getDuration();
       if(dur > 0){
-        progressFill.style.width = ((cur / dur) * 100) + '%';
+        setNeedleProgress(cur / dur);
         elapsedTime.textContent = fmtTime(cur) + ' / ' + fmtTime(dur);
       }
     }catch(e){}
