@@ -87,13 +87,18 @@
 
   .g-tracklist{ position:absolute; inset:0; display:flex; flex-direction:column; padding:8px; background:rgba(10,10,17,.5); backdrop-filter:blur(9px); border-radius:2px;
     opacity:0; transform:translateY(10px) scale(.97); pointer-events:none;
-    transition:opacity .35s ease, transform .35s ease; }
-  .g-panel-body.expanded .g-tracklist{ opacity:1; transform:none; pointer-events:auto; }
+    transition:opacity .3s ease, transform .3s ease; }
+  .g-panel-body.expanded .g-tracklist{ opacity:1; transform:none; pointer-events:auto; transition-delay:.38s; }
   #trackRows{ display:flex; flex-direction:column; gap:1px; overflow-y:auto; flex:1 1 auto; scrollbar-width:thin; scrollbar-color:#C9A227 rgba(245,230,200,.06); }
 
   .g-stack{ position:absolute; inset:0; width:100%; border:none; background:transparent; cursor:pointer; padding:10px 0 4px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:8px;
-    opacity:1; transform:none; transition:opacity .35s ease, transform .35s ease; }
-  .g-panel-body.expanded .g-stack{ opacity:0; transform:translateY(-16px) rotate(-6deg) scale(.9); pointer-events:none; }
+    opacity:1; transition:opacity .28s ease; }
+  .stack-disc{ transition: transform .45s cubic-bezier(.34,1.4,.64,1); transform-box:fill-box; transform-origin:center; }
+  .g-panel-body.expanded .stack-disc.sd1{ transform: translate(34px,-44px) rotate(13deg); }
+  .g-panel-body.expanded .stack-disc.sd2{ transform: translate(-28px,-16px) rotate(-9deg); }
+  .g-panel-body.expanded .stack-disc.sd3{ transform: translate(26px,8px) rotate(7deg); }
+  .g-panel-body.expanded .stack-disc.sd4{ transform: translate(-22px,22px) rotate(-6deg); }
+  .g-panel-body.expanded .g-stack{ opacity:0; pointer-events:none; transition-delay:.34s; }
   .g-stack:hover{ opacity:.85; }
   .g-panel-body.expanded .g-stack:hover{ opacity:0; }
   .g-stack:hover ellipse:last-of-type{ filter:brightness(1.15); }
@@ -346,12 +351,14 @@
               </linearGradient>
             </defs>
             <g transform="translate(130,58)">
-              <ellipse cx="0" cy="36" rx="70" ry="18" fill="url(#stackEdge)"/>
-              <ellipse cx="0" cy="24" rx="70" ry="18" fill="url(#stackEdge)"/>
-              <ellipse cx="0" cy="12" rx="70" ry="18" fill="url(#stackEdge)"/>
-              <ellipse cx="0" cy="0" rx="70" ry="18" fill="#1c1b26" stroke="#3a3648" stroke-width="1"/>
-              <ellipse cx="0" cy="0" rx="22" ry="6" fill="#8B2635"/>
-              <circle cx="0" cy="0" r="2.5" fill="#12131F"/>
+              <g class="stack-disc sd4"><ellipse cx="0" cy="36" rx="70" ry="18" fill="url(#stackEdge)"/></g>
+              <g class="stack-disc sd3"><ellipse cx="0" cy="24" rx="70" ry="18" fill="url(#stackEdge)"/></g>
+              <g class="stack-disc sd2"><ellipse cx="0" cy="12" rx="70" ry="18" fill="url(#stackEdge)"/></g>
+              <g class="stack-disc sd1">
+                <ellipse cx="0" cy="0" rx="70" ry="18" fill="#1c1b26" stroke="#3a3648" stroke-width="1"/>
+                <ellipse cx="0" cy="0" rx="22" ry="6" fill="#8B2635"/>
+                <circle cx="0" cy="0" r="2.5" fill="#12131F"/>
+              </g>
             </g>
             <path id="stackChevron" d="M118,128 L130,138 L142,128" fill="none" stroke="#C9A227" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
           </svg>
