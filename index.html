@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Mausiqi</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -196,6 +196,90 @@
     .g-btn-round{ width:34px; height:34px; }
     .g-btn-play{ width:48px; height:48px; }
   }
+
+  /* ============ MOBILE LAYOUT (phone-native, <=700px) ============ */
+  #m-root{ display:none; }
+  @media (max-width: 700px){
+    #g-root{ display:none !important; }
+    #m-root{
+      display:flex; flex-direction:column;
+      width:100vw; height:100vh; height:100dvh; overflow:hidden;
+      position:relative; color:#F5E6C8; font-family:'Work Sans',sans-serif;
+      background:#12131F;
+    }
+    .m-bg{ position:absolute; inset:0; pointer-events:none;
+      background:radial-gradient(120% 70% at 50% 30%, rgba(139,38,53,.22) 0%, rgba(18,19,31,0) 65%),
+                 linear-gradient(180deg, #0E0F19, #12131F 55%, #191423); }
+
+    .m-head{ position:relative; z-index:2; display:flex; align-items:baseline; justify-content:space-between; padding:14px 16px 8px; }
+    .m-brand{ display:flex; align-items:baseline; gap:8px; }
+    .m-title{ font-family:'Amiri',serif; font-weight:700; font-size:24px; }
+    .m-title-fa{ font-family:'Amiri',serif; font-size:14px; color:#C9A227; direction:rtl; }
+    .m-count{ font-size:10px; letter-spacing:.18em; text-transform:uppercase; color:rgba(245,230,200,.45); }
+
+    .m-nav-wrap{ position:relative; z-index:2; padding:0 16px 4px; }
+    .m-nav{ display:flex; gap:8px; overflow-x:auto; padding-bottom:6px; scrollbar-width:none; -webkit-overflow-scrolling:touch; }
+    .m-nav::-webkit-scrollbar{ display:none; }
+    #m-root .g-nav-item{ flex:0 0 auto; display:flex; align-items:center; gap:6px;
+      border:1px solid rgba(201,162,39,.3); background:rgba(27,29,48,.55); border-radius:18px;
+      color:rgba(245,230,200,.6); padding:8px 14px; font-size:11px; letter-spacing:.1em; text-transform:uppercase;
+      white-space:nowrap; cursor:pointer; }
+    #m-root .g-nav-item.active{ background:#C9A227; color:#12131F; border-color:#C9A227; font-weight:600; }
+    #m-root .g-nav-item .g-nav-dash{ display:none; }
+    #m-root .g-nav-item .g-nav-remove{ opacity:.7; margin-left:2px; font-size:12px; padding:0 2px; background:none; border:none; color:inherit; }
+    .m-add-pill{ flex:0 0 auto; width:34px; height:34px; border-radius:50%; border:1px dashed rgba(201,162,39,.5);
+      background:transparent; color:#C9A227; font-size:16px; cursor:pointer; display:flex; align-items:center; justify-content:center; }
+    .m-add-form{ display:none; flex-direction:column; gap:6px; padding-top:6px; }
+    .m-add-form.open{ display:flex; }
+    .m-add-form input{ width:100%; background:rgba(10,10,17,.6); border:1px solid rgba(245,230,200,.18); border-radius:6px;
+      padding:10px 12px; color:#F5E6C8; font-size:13px; outline:none; }
+    .m-add-form input:focus{ border-color:#C9A227; }
+    .m-add-form .g-add-form-row{ display:flex; gap:6px; }
+    .m-add-form button{ background:#C9A227; color:#12131F; border:none; border-radius:6px; padding:0 16px; font-weight:600; font-size:12px; cursor:pointer; }
+
+    .m-panel-body{ position:relative; z-index:1; flex:1 1 auto; min-height:0; display:flex; align-items:center; justify-content:center; padding:4px 16px; }
+    .m-record{ border:none; background:transparent; cursor:pointer; display:flex; flex-direction:column; align-items:center; gap:10px; padding:0; }
+    .m-disc-svg{ width:min(56vw, 30vh); height:min(56vw, 30vh); filter:drop-shadow(0 14px 28px rgba(0,0,0,.55)); }
+    body.is-playing .m-disc-svg{ animation:g-spin 4.2s linear infinite; }
+    .m-record-hint{ font-size:10px; letter-spacing:.16em; text-transform:uppercase; color:rgba(245,230,200,.42); }
+    .m-tracklist{ position:absolute; inset:4px 16px; display:none; flex-direction:column;
+      background:rgba(10,10,17,.65); backdrop-filter:blur(10px); border-radius:8px; padding:8px; }
+    #m-panelBody.expanded .m-record{ display:none; }
+    #m-panelBody.expanded .m-tracklist{ display:flex; }
+    .m-hide-btn{ flex-shrink:0; margin:0 auto 6px auto; display:block; }
+    #m-trackRows{ flex:1 1 auto; min-height:0; overflow-y:auto; display:flex; flex-direction:column; gap:1px;
+      scrollbar-width:thin; scrollbar-color:#C9A227 rgba(245,230,200,.06); }
+    #m-root .g-track{ min-height:52px; padding:9px 12px; }
+    #m-root .g-track-title{ font-size:15px; }
+
+    .m-player{ position:relative; z-index:2; flex-shrink:0; padding:10px 16px calc(12px + env(safe-area-inset-bottom));
+      background:rgba(10,10,17,.55); backdrop-filter:blur(12px); border-top:1px solid rgba(201,162,39,.2);
+      display:flex; flex-direction:column; gap:8px; }
+    .m-now-row{ display:flex; align-items:baseline; gap:10px; min-width:0; }
+    .m-status{ flex-shrink:0; font-size:9px; letter-spacing:.2em; text-transform:uppercase; color:#C9A227; }
+    .m-now{ font-family:'Amiri',serif; font-size:16px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; min-width:0; }
+    .m-seek-row{ display:flex; justify-content:center; padding:4px 0; }
+    .m-needle{ width:328px; max-width:100%; height:16px; cursor:pointer; }
+    #m-progressBead{ transition: cx 0.15s linear; }
+    .m-times{ text-align:center; font-size:10px; color:rgba(245,230,200,.45); font-variant-numeric:tabular-nums; }
+    .m-controls{ display:flex; align-items:center; justify-content:center; gap:14px; }
+    .m-btn{ position:relative; width:44px; height:44px; border-radius:50%; display:flex; align-items:center; justify-content:center;
+      border:1px solid rgba(201,162,39,.35);
+      background:radial-gradient(circle at 34% 30%, #2c2418, #16130f 78%);
+      color:rgba(245,230,200,.85); font-size:15px; cursor:pointer;
+      box-shadow:0 3px 8px rgba(0,0,0,.5), inset 0 1px 0 rgba(245,230,200,.12), inset 0 -3px 5px rgba(0,0,0,.55); }
+    .m-btn:active{ transform:scale(.93); }
+    .m-btn.on{ border-color:#F0DFA0; color:#211a0d;
+      background:radial-gradient(circle at 34% 30%, #F0DFA0, #C9A227 55%, #8f6f1a 100%); }
+    .m-play{ width:60px; height:60px; border:2px solid #3a2f1a; font-size:18px; color:#211a0d;
+      background:radial-gradient(circle at 35% 28%, #F0DFA0, #C9A227 55%, #8f6f1a 100%);
+      box-shadow:0 8px 18px rgba(0,0,0,.5), inset 0 2px 2px rgba(255,255,255,.5), inset 0 -3px 6px rgba(70,50,10,.5); }
+    .m-volume{ display:flex; align-items:center; justify-content:center; gap:10px; }
+    #m-root .g-volume-bars{ display:flex; align-items:flex-end; gap:5px; height:22px; }
+    #m-root .g-volume-bars button{ width:12px; min-height:10px; border:none; border-radius:2px;
+      background:rgba(245,230,200,.2); cursor:pointer; padding:0; }
+    #m-root .g-volume-bars button.on{ background:#C9A227; }
+  }
 </style>
 </head>
 <body>
@@ -333,10 +417,126 @@
   </div>
 </div>
 
+<div id="m-root">
+  <div class="m-bg"></div>
+  <header class="m-head">
+    <div class="m-brand">
+      <span class="m-title">Mausiqi</span>
+      <span class="m-title-fa">موسیقی</span>
+    </div>
+    <span class="m-count" id="m-panelCount"></span>
+  </header>
+
+  <div class="m-nav-wrap">
+    <div class="m-nav" id="m-gNav">
+      <button type="button" class="g-nav-add m-add-pill" id="m-addPlaylistToggle">+</button>
+    </div>
+    <div class="g-add-form m-add-form" id="m-addPlaylistForm">
+      <input type="text" id="m-playlistNameInput" placeholder="Label (optional)">
+      <div class="g-add-form-row">
+        <input type="text" id="m-playlistLinkInput" placeholder="Playlist link or ID">
+        <button type="button" id="m-addPlaylistBtn">Add</button>
+      </div>
+      <div class="g-add-status" id="m-addStatus"></div>
+    </div>
+  </div>
+
+  <div class="m-panel-body" id="m-panelBody">
+    <button type="button" class="m-record" id="m-recordStack" aria-label="Show track list">
+      <svg viewBox="0 0 200 200" class="m-disc-svg">
+        <defs>
+          <radialGradient id="m-discShine" cx="35%" cy="30%" r="80%">
+            <stop offset="0%" stop-color="#2c2836"/>
+            <stop offset="60%" stop-color="#17151f"/>
+            <stop offset="100%" stop-color="#201c28"/>
+          </radialGradient>
+        </defs>
+        <circle cx="100" cy="100" r="96" fill="url(#m-discShine)" stroke="#3a3648" stroke-width="1.5"/>
+        <circle cx="100" cy="100" r="82" fill="none" stroke="rgba(245,230,200,0.05)" stroke-width="1"/>
+        <circle cx="100" cy="100" r="70" fill="none" stroke="rgba(245,230,200,0.06)" stroke-width="1"/>
+        <circle cx="100" cy="100" r="58" fill="none" stroke="rgba(245,230,200,0.05)" stroke-width="1"/>
+        <circle cx="100" cy="100" r="46" fill="none" stroke="rgba(245,230,200,0.06)" stroke-width="1"/>
+        <circle cx="100" cy="100" r="30" fill="#8B2635" stroke="rgba(201,162,39,0.5)" stroke-width="1.2"/>
+        <text x="100" y="96" text-anchor="middle" font-family="Amiri, serif" font-size="15" fill="#F5E6C8">Mausiqi</text>
+        <text x="100" y="114" text-anchor="middle" font-family="Amiri, serif" font-size="11" fill="#C9A227">موسیقی</text>
+        <circle cx="100" cy="100" r="3" fill="#12131F"/>
+      </svg>
+      <span class="m-record-hint">Tap for tracks</span>
+    </button>
+    <div class="m-tracklist" id="m-trackList">
+      <button type="button" class="g-mini-toggle m-hide-btn" id="m-hideTracksBtn">&#9652; Hide tracks</button>
+      <div id="m-trackRows">
+        <div class="g-empty">Add a playlist to begin.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="m-player">
+    <div class="m-now-row">
+      <span class="m-status" id="m-statusLabel">Paused</span>
+      <span class="m-now" id="m-nowTitle">&mdash;</span>
+    </div>
+    <div class="m-seek-row">
+      <svg class="m-needle" id="m-progressTrack" viewBox="0 0 328 16">
+        <defs>
+          <linearGradient id="m-steelGrad" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#E8E8EC"/>
+            <stop offset="35%" stop-color="#9C9CA6"/>
+            <stop offset="55%" stop-color="#6B6B74"/>
+            <stop offset="100%" stop-color="#38383E"/>
+          </linearGradient>
+          <linearGradient id="m-brassGrad" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#F0DFA0"/>
+            <stop offset="45%" stop-color="#C9A227"/>
+            <stop offset="100%" stop-color="#6E4E14"/>
+          </linearGradient>
+          <clipPath id="m-needleClip"><rect id="m-needleClipRect" x="0" y="0" width="0" height="16"/></clipPath>
+        </defs>
+        <circle cx="16" cy="8" r="5" fill="none" stroke="url(#m-steelGrad)" stroke-width="4"/>
+        <path d="M16,5.5 L303,5 L320,8 L303,11 L16,10.5 Z" fill="url(#m-steelGrad)"/>
+        <g clip-path="url(#m-needleClip)">
+          <circle cx="16" cy="8" r="5" fill="none" stroke="url(#m-brassGrad)" stroke-width="4"/>
+          <path d="M16,5.5 L303,5 L320,8 L303,11 L16,10.5 Z" fill="url(#m-brassGrad)"/>
+        </g>
+        <circle id="m-progressBead" cx="16" cy="8" r="4.5" fill="#F0DFA0" stroke="#12131F" stroke-width="1.5"/>
+      </svg>
+    </div>
+    <div class="m-times" id="m-elapsedTime">0:00 / 0:00</div>
+    <div class="m-controls">
+      <button type="button" class="m-btn" id="m-shuffleBtn" title="Shuffle">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 3 21 3 21 8"></polyline><line x1="4" y1="20" x2="21" y2="3"></line><polyline points="21 16 21 21 16 21"></polyline><line x1="15" y1="15" x2="21" y2="21"></line><line x1="4" y1="4" x2="9" y2="9"></line></svg>
+      </button>
+      <button type="button" class="m-btn" id="m-prevBtn" title="Previous">&#9194;</button>
+      <button type="button" class="m-btn m-play" id="m-playPauseBtn" title="Play / pause">&#9654;</button>
+      <button type="button" class="m-btn" id="m-nextBtn" title="Next">&#9193;</button>
+      <button type="button" class="m-btn" id="m-repeatBtn" title="Repeat">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="17 1 21 5 17 9"></polyline><path d="M3 11V9a4 4 0 0 1 4-4h14"></path><polyline points="7 23 3 19 7 15"></polyline><path d="M21 13v2a4 4 0 0 1-4 4H3"></path></svg>
+        <span class="g-repeat-badge" id="m-repeatBadge">1</span>
+      </button>
+    </div>
+    <div class="m-volume">
+      <span class="g-volume-label">Vol</span>
+      <div class="g-volume-bars" id="m-volumeBars"></div>
+    </div>
+  </div>
+</div>
+
 <div id="ytPlayerHidden"><div id="ytPlayer"></div></div>
 
 <script>
 (function(){
+  // Layout resolution: on phone widths, ids prefixed "m-" take priority so
+  // the same logic drives whichever layout is visible.
+  const isMobileLayout = window.matchMedia('(max-width: 700px)').matches;
+  function $id(id){
+    if(isMobileLayout){
+      const m = document.getElementById('m-' + id);
+      if(m) return m;
+    }
+    return document.getElementById(id);
+  }
+  window.matchMedia('(max-width: 700px)').addEventListener('change', () => location.reload());
+
   // ---- SITE OWNER: real key already set below ----
   const SITE_API_KEY = "AIzaSyC7eCXVmSldjiW34uNZ0QlpO_zF1J9lx-k";
   const PLAYLISTS_STORAGE = 'mausiqi-playlists';
@@ -353,34 +553,34 @@
   let repeatMode = 'off'; // off | all | one
   let volume = 100;
 
-  const gRoot = document.getElementById('g-root');
-  const gNav = document.getElementById('gNav');
-  const addPlaylistToggle = document.getElementById('addPlaylistToggle');
-  const addPlaylistForm = document.getElementById('addPlaylistForm');
-  const playlistNameInput = document.getElementById('playlistNameInput');
-  const playlistLinkInput = document.getElementById('playlistLinkInput');
-  const addPlaylistBtn = document.getElementById('addPlaylistBtn');
-  const addStatus = document.getElementById('addStatus');
-  const panelName = document.getElementById('panelName');
-  const panelCount = document.getElementById('panelCount');
-  const trackListEl = document.getElementById('trackList');
-  const trackRowsEl = document.getElementById('trackRows');
-  const showTracksBtn = document.getElementById('showTracksBtn');
-  const hideTracksBtn = document.getElementById('hideTracksBtn');
-  const panelToggle = document.getElementById('panelToggle');
-  const recordStack = document.getElementById('recordStack');
-  const shuffleBtn = document.getElementById('shuffleBtn');
-  const repeatBtn = document.getElementById('repeatBtn');
-  const prevBtn = document.getElementById('prevBtn');
-  const playPauseBtn = document.getElementById('playPauseBtn');
-  const nextBtn = document.getElementById('nextBtn');
-  const statusLabel = document.getElementById('statusLabel');
-  const nowTitle = document.getElementById('nowTitle');
-  const progressTrack = document.getElementById('progressTrack');
-  const needleClipRect = document.getElementById('needleClipRect');
-  const progressBead = document.getElementById('progressBead');
-  const elapsedTime = document.getElementById('elapsedTime');
-  const volumeBars = document.getElementById('volumeBars');
+  const gRoot = $id('g-root');
+  const gNav = $id('gNav');
+  const addPlaylistToggle = $id('addPlaylistToggle');
+  const addPlaylistForm = $id('addPlaylistForm');
+  const playlistNameInput = $id('playlistNameInput');
+  const playlistLinkInput = $id('playlistLinkInput');
+  const addPlaylistBtn = $id('addPlaylistBtn');
+  const addStatus = $id('addStatus');
+  const panelName = $id('panelName');
+  const panelCount = $id('panelCount');
+  const trackListEl = $id('trackList');
+  const trackRowsEl = $id('trackRows');
+  const showTracksBtn = $id('showTracksBtn');
+  const hideTracksBtn = $id('hideTracksBtn');
+  const panelToggle = $id('panelToggle');
+  const recordStack = $id('recordStack');
+  const shuffleBtn = $id('shuffleBtn');
+  const repeatBtn = $id('repeatBtn');
+  const prevBtn = $id('prevBtn');
+  const playPauseBtn = $id('playPauseBtn');
+  const nextBtn = $id('nextBtn');
+  const statusLabel = $id('statusLabel');
+  const nowTitle = $id('nowTitle');
+  const progressTrack = $id('progressTrack');
+  const needleClipRect = $id('needleClipRect');
+  const progressBead = $id('progressBead');
+  const elapsedTime = $id('elapsedTime');
+  const volumeBars = $id('volumeBars');
 
   function escapeHtml(str){
     const div = document.createElement('div');
@@ -547,7 +747,7 @@
   }
 
   let panelExpanded = false;
-  const panelBody = document.getElementById('panelBody');
+  const panelBody = $id('panelBody');
   function setPanelExpanded(expanded){
     panelExpanded = expanded;
     panelBody.classList.toggle('expanded', expanded);
@@ -661,7 +861,7 @@
   repeatBtn.addEventListener('click', () => {
     repeatMode = repeatMode === 'off' ? 'all' : (repeatMode === 'all' ? 'one' : 'off');
     repeatBtn.classList.toggle('on', repeatMode !== 'off');
-    document.getElementById('repeatBadge').classList.toggle('visible', repeatMode === 'one');
+    $id('repeatBadge').classList.toggle('visible', repeatMode === 'one');
   });
 
   playPauseBtn.addEventListener('click', () => {
@@ -676,7 +876,7 @@
     if(!player || !player.getDuration) return;
     const rect = progressTrack.getBoundingClientRect();
     const clickRatioRaw = (e.clientX - rect.left) / rect.width;
-    const viewBoxX = clickRatioRaw * 460;
+    const viewBoxX = clickRatioRaw * NEEDLE_VIEW_W;
     const ratio = Math.max(0, Math.min(1, (viewBoxX - NEEDLE_START) / (NEEDLE_END - NEEDLE_START)));
     const dur = player.getDuration();
     if(dur > 0){ player.seekTo(dur * ratio, true); setNeedleProgress(ratio); }
@@ -690,10 +890,11 @@
     else if(e.code === 'ArrowLeft'){ goPrev(); }
   });
 
-  const NEEDLE_START = 16, NEEDLE_END = 442;
+  const NEEDLE_VIEW_W = isMobileLayout ? 328 : 460;
+  const NEEDLE_START = 16, NEEDLE_END = isMobileLayout ? 310 : 442;
   function setNeedleProgress(ratio){
     ratio = Math.max(0, Math.min(1, ratio));
-    needleClipRect.setAttribute('width', (ratio * 460).toFixed(1));
+    needleClipRect.setAttribute('width', (ratio * NEEDLE_VIEW_W).toFixed(1));
     progressBead.setAttribute('cx', (NEEDLE_START + ratio * (NEEDLE_END - NEEDLE_START)).toFixed(1));
   }
 
