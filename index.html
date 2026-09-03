@@ -36,6 +36,7 @@
   .scene-canvas-wrap{ position:absolute; inset:0; }
   .scene-canvas-wrap canvas{ display:block; width:100%; height:100%; }
   #g-scene{ z-index:0; }
+  #m-scene-bg{ z-index:0; pointer-events:none; }
   body.has-webgl3d .fallback-bg{ display:none !important; }
   .g-disc-glow{ position:absolute; inset:-18%; border-radius:50%; background:radial-gradient(closest-side, rgba(201,162,39,.2), rgba(18,19,31,0) 72%); filter:blur(8px); }
   .g-disc{ position:absolute; inset:0; border-radius:50%; overflow:hidden; box-shadow:0 40px 80px rgba(0,0,0,.66), inset 0 0 0 1px rgba(245,230,200,.08);
@@ -53,7 +54,8 @@
 
   .g-motes span{ position:absolute; border-radius:50%; animation:g-mote linear infinite; }
 
-  .g-content{ position:absolute; inset:0; z-index:6; display:grid; grid-template-columns:auto 1fr 372px; grid-template-rows:auto 1fr auto; gap:0 42px; padding:40px 52px 34px; }
+  .g-content{ position:absolute; inset:0; z-index:6; display:grid; grid-template-columns:auto 1fr 372px; grid-template-rows:auto 1fr auto; gap:0 42px; padding:40px 52px 34px; pointer-events:none; }
+  .g-content > *{ pointer-events:auto; }
 
   .g-header{ grid-column:1 / 3; animation:g-in .85s ease-out both; }
   .g-title{ font-family:'Amiri',serif; font-weight:700; font-size:52px; line-height:1.1; text-shadow:0 4px 26px rgba(18,19,31,.9); }
@@ -248,12 +250,12 @@
 
     .m-panel-body{ position:relative; z-index:1; flex:1 1 auto; min-height:0; display:flex; align-items:center; justify-content:center; padding:4px 16px; }
     .m-record{ border:none; background:transparent; cursor:pointer; display:flex; flex-direction:column; align-items:center; gap:10px; padding:0; }
-    .m-disc-svg{ width:min(56vw, 30vh); height:min(56vw, 30vh); filter:drop-shadow(0 14px 28px rgba(0,0,0,.55)); }
-    .m-scene-slot{ width:min(56vw, 30vh); height:min(56vw, 30vh); display:none; }
+    .m-disc-svg{ width:min(72vw, 38vh); height:min(72vw, 38vh); filter:drop-shadow(0 14px 28px rgba(0,0,0,.55)); }
+    .m-scene-slot{ width:min(72vw, 38vh); height:min(72vw, 38vh); display:none; }
     body.has-webgl3d .m-scene-slot{ display:block; }
     .m-scene-slot canvas{ display:block; width:100%; height:100%; }
     .m-record{ position:relative; }
-    .m-disc-sheen{ position:absolute; top:0; left:50%; transform:translateX(-50%); width:min(56vw, 30vh); height:min(56vw, 30vh); border-radius:50%; pointer-events:none; mix-blend-mode:screen; opacity:.55;
+    .m-disc-sheen{ position:absolute; top:0; left:50%; transform:translateX(-50%); width:min(72vw, 38vh); height:min(72vw, 38vh); border-radius:50%; pointer-events:none; mix-blend-mode:screen; opacity:.55;
       background:conic-gradient(from 0deg, rgba(245,230,200,.16), rgba(245,230,200,0) 26%, rgba(201,162,39,.2) 46%, rgba(245,230,200,0) 66%, rgba(139,38,53,.22) 86%, rgba(245,230,200,.12) 100%); }
     body.is-playing .m-disc-svg{ animation:g-spin 4.2s linear infinite; }
     .m-record-hint{ font-size:10px; letter-spacing:.16em; text-transform:uppercase; color:rgba(245,230,200,.42); }
@@ -440,6 +442,7 @@
 </div>
 
 <div id="m-root">
+  <div id="m-scene-bg" class="scene-canvas-wrap"></div>
   <div class="m-bg fallback-bg"></div>
   <header class="m-head">
     <div class="m-brand">
@@ -606,7 +609,7 @@ window.mausiqi3D = { setPlaying: function(){} };
   const glowTex = makeGlowTexture();
   document.fonts && document.fonts.ready && document.fonts.ready.then(function(){
     const fresh = makeVinylTexture(true);
-    instances.forEach(function(inst){ inst.faceMat.map = fresh; inst.faceMat.needsUpdate = true; });
+    instances.forEach(function(inst){ if(inst.faceMat){ inst.faceMat.map = fresh; inst.faceMat.needsUpdate = true; } });
   });
 
   const instances = [];
@@ -617,6 +620,7 @@ window.mausiqi3D = { setPlaying: function(){} };
     const particleCount = opts.particleCount || 0;
     const withOrbs = !!opts.withOrbs;
     const withDrag = opts.withDrag !== false;
+    const withRecord = opts.withRecord !== false;
     const onTap = opts.onTap || null;
 
     const scene = new THREE.Scene();
@@ -632,17 +636,20 @@ window.mausiqi3D = { setPlaying: function(){} };
     const rim = new THREE.PointLight(0x8B2635, 1.4, 30); rim.position.set(6,1.5,4); scene.add(rim);
     const brass = new THREE.PointLight(0xC9A227, 0.7, 25); brass.position.set(-6,-3,5); scene.add(brass);
 
-    const faceMat = new THREE.MeshPhongMaterial({ map: faceTex, bumpMap: bumpTex, bumpScale: 0.015, shininess: 68, specular: new THREE.Color(0x5a5348) });
-    const edgeMat = new THREE.MeshPhongMaterial({ color: 0x191722, shininess: 30, specular: 0x33302a });
     const R = 4.4;
-    const geo = new THREE.CylinderGeometry(R, R, 0.14, 96);
-    const record = new THREE.Mesh(geo, [edgeMat, faceMat, faceMat]);
-    record.rotation.y = Math.PI / 2;
+    let record = null, tiltGroup = null, faceMat = null;
+    if(withRecord){
+      faceMat = new THREE.MeshPhongMaterial({ map: faceTex, bumpMap: bumpTex, bumpScale: 0.015, shininess: 68, specular: new THREE.Color(0x5a5348) });
+      const edgeMat = new THREE.MeshPhongMaterial({ color: 0x191722, shininess: 30, specular: 0x33302a });
+      const geo = new THREE.CylinderGeometry(R, R, 0.14, 96);
+      record = new THREE.Mesh(geo, [edgeMat, faceMat, faceMat]);
+      record.rotation.y = Math.PI / 2;
 
-    const tiltGroup = new THREE.Group();
-    tiltGroup.add(record);
-    scene.add(tiltGroup);
-    tiltGroup.rotation.x = 0.55;
+      tiltGroup = new THREE.Group();
+      tiltGroup.add(record);
+      scene.add(tiltGroup);
+      tiltGroup.rotation.x = 0.92;
+    }
 
     // particles
     let pGeo, pMat, particles, pPhase, pSpeed, spreadX = 9, spreadY = 5.5, spreadZ = [-6,3];
@@ -684,20 +691,9 @@ window.mausiqi3D = { setPlaying: function(){} };
       });
     }
 
-    const ripples = [];
-    function spawnRipple(){
-      const rgeo = new THREE.RingGeometry(R+0.1, R+0.24, 80);
-      const rmat = new THREE.MeshBasicMaterial({ color:0xC9A227, transparent:true, opacity:0.4, side:THREE.DoubleSide, blending:THREE.AdditiveBlending, depthWrite:false });
-      const ring = new THREE.Mesh(rgeo, rmat);
-      ring.rotation.x = -Math.PI/2;
-      tiltGroup.add(ring);
-      ripples.push({ring:ring, life:0});
-    }
-    let rippleTimer = 0;
-
     let playing = false, spinVel = 0;
     const BASE_SPIN = 0.02;
-    let targetTiltX = 0.55, targetTiltZ = 0;
+    let targetTiltX = 0.92, targetTiltZ = 0;
     let dragging = false, lastX = 0, lastY = 0, dragDist = 0;
 
     function onDown(clientX, clientY){
@@ -736,7 +732,7 @@ window.mausiqi3D = { setPlaying: function(){} };
       window.addEventListener('mousemove', function(e){
         const nx = e.clientX / window.innerWidth - 0.5;
         const ny = e.clientY / window.innerHeight - 0.5;
-        targetTiltX = 0.55 + ny*0.22;
+        targetTiltX = 0.92 + ny*0.20;
         targetTiltZ = -nx*0.16;
       });
     }
@@ -767,9 +763,11 @@ window.mausiqi3D = { setPlaying: function(){} };
       if(container.clientWidth < 1) return;
       t += 0.016;
       spinVel *= 0.965;
-      record.rotation.y += spinVel + (playing ? BASE_SPIN : 0);
-      tiltGroup.rotation.x += (targetTiltX - tiltGroup.rotation.x) * 0.06;
-      tiltGroup.rotation.z += (targetTiltZ - tiltGroup.rotation.z) * 0.06;
+      if(record){
+        record.rotation.y += spinVel + (playing ? BASE_SPIN : 0);
+        tiltGroup.rotation.x += (targetTiltX - tiltGroup.rotation.x) * 0.06;
+        tiltGroup.rotation.z += (targetTiltZ - tiltGroup.rotation.z) * 0.06;
+      }
 
       if(particles){
         const pos = pGeo.attributes.position.array;
@@ -785,17 +783,6 @@ window.mausiqi3D = { setPlaying: function(){} };
         o.spr.position.x = o.baseX + Math.sin(t*o.sp*900 + o.phase)*1.2;
         o.spr.position.y = o.baseY + Math.cos(t*o.sp*700 + o.phase)*0.8;
       });
-      if(playing){
-        rippleTimer += 0.016;
-        if(rippleTimer > 1.4){ rippleTimer = 0; spawnRipple(); }
-      }
-      for(let i=ripples.length-1;i>=0;i--){
-        const r = ripples[i]; r.life += 0.016;
-        const k = r.life/2.2;
-        r.ring.scale.setScalar(1 + k*1.6);
-        r.ring.material.opacity = 0.4*(1-k);
-        if(k>=1){ tiltGroup.remove(r.ring); r.ring.geometry.dispose(); r.ring.material.dispose(); ripples.splice(i,1); }
-      }
       renderer.render(scene, camera);
     }
     animate();
@@ -809,8 +796,10 @@ window.mausiqi3D = { setPlaying: function(){} };
 
   const gScene = document.getElementById('g-scene');
   const mScene = document.getElementById('m-scene');
+  const mSceneBg = document.getElementById('m-scene-bg');
   const gInst = gScene ? createScene(gScene, { fullBackground:true, particleCount:320, withOrbs:true, withDrag:true }) : null;
-  const mInst = mScene ? createScene(mScene, { fullBackground:false, particleCount:50, withOrbs:false, withDrag:true, onTap:true }) : null;
+  const mBgInst = mSceneBg ? createScene(mSceneBg, { fullBackground:true, particleCount:320, withOrbs:true, withDrag:false, withRecord:false }) : null;
+  const mInst = mScene ? createScene(mScene, { fullBackground:false, particleCount:0, withOrbs:false, withDrag:true, onTap:true }) : null;
 
   window.mausiqi3D.setPlaying = function(p){
     if(gInst) gInst.setPlaying(p);
