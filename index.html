@@ -7,6 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Work+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <style>
   * { margin:0; padding:0; box-sizing:border-box; }
   html, body { width:100%; height:100%; overflow:hidden; background:#12131F; }
@@ -32,6 +33,10 @@
   .g-grooves{ position:absolute; left:50%; top:50%; width:min(150vh,150vw); height:min(150vh,150vw); margin:calc(min(150vh,150vw) / -2) 0 0 calc(min(150vh,150vw) / -2); pointer-events:none; opacity:.34; border-radius:50%; background:repeating-radial-gradient(circle at 50% 50%, rgba(245,230,200,.11) 0 1px, rgba(0,0,0,0) 1px 13px); }
 
   .g-disc-wrap{ position:absolute; left:50%; top:50%; width:min(72vh,60vw); height:min(72vh,60vw); margin:calc(min(72vh,60vw) / -2) 0 0 calc(min(72vh,60vw) / -2); pointer-events:none; }
+  .scene-canvas-wrap{ position:absolute; inset:0; }
+  .scene-canvas-wrap canvas{ display:block; width:100%; height:100%; }
+  #g-scene{ z-index:0; }
+  body.has-webgl3d .fallback-bg{ display:none !important; }
   .g-disc-glow{ position:absolute; inset:-18%; border-radius:50%; background:radial-gradient(closest-side, rgba(201,162,39,.2), rgba(18,19,31,0) 72%); filter:blur(8px); }
   .g-disc{ position:absolute; inset:0; border-radius:50%; overflow:hidden; box-shadow:0 40px 80px rgba(0,0,0,.66), inset 0 0 0 1px rgba(245,230,200,.08);
     animation:g-spin 4.2s linear infinite; animation-play-state:paused;
@@ -244,6 +249,9 @@
     .m-panel-body{ position:relative; z-index:1; flex:1 1 auto; min-height:0; display:flex; align-items:center; justify-content:center; padding:4px 16px; }
     .m-record{ border:none; background:transparent; cursor:pointer; display:flex; flex-direction:column; align-items:center; gap:10px; padding:0; }
     .m-disc-svg{ width:min(56vw, 30vh); height:min(56vw, 30vh); filter:drop-shadow(0 14px 28px rgba(0,0,0,.55)); }
+    .m-scene-slot{ width:min(56vw, 30vh); height:min(56vw, 30vh); display:none; }
+    body.has-webgl3d .m-scene-slot{ display:block; }
+    .m-scene-slot canvas{ display:block; width:100%; height:100%; }
     .m-record{ position:relative; }
     .m-disc-sheen{ position:absolute; top:0; left:50%; transform:translateX(-50%); width:min(56vw, 30vh); height:min(56vw, 30vh); border-radius:50%; pointer-events:none; mix-blend-mode:screen; opacity:.55;
       background:conic-gradient(from 0deg, rgba(245,230,200,.16), rgba(245,230,200,0) 26%, rgba(201,162,39,.2) 46%, rgba(245,230,200,0) 66%, rgba(139,38,53,.22) 86%, rgba(245,230,200,.12) 100%); }
@@ -296,11 +304,12 @@
 <body>
 
 <div id="g-root">
-  <div class="g-bg" data-depth="0.08"></div>
-  <div class="g-grain" data-depth="0.2"></div>
-  <div class="g-grooves" data-depth="0.34"></div>
+  <div id="g-scene" class="scene-canvas-wrap"></div>
+  <div class="g-bg fallback-bg" data-depth="0.08"></div>
+  <div class="g-grain fallback-bg" data-depth="0.2"></div>
+  <div class="g-grooves fallback-bg" data-depth="0.34"></div>
 
-  <div class="g-disc-wrap" data-depth="0.5">
+  <div class="g-disc-wrap fallback-bg" data-depth="0.5">
     <div class="g-disc-glow"></div>
     <div class="g-disc" id="gDisc">
       <div class="g-label">
@@ -314,7 +323,7 @@
     <div class="g-ring2"></div>
   </div>
 
-  <div class="g-motes" data-depth="0.78">
+  <div class="g-motes fallback-bg" data-depth="0.78">
     <span style="left:22%; bottom:4%; width:4px; height:4px; background:#C9A227; box-shadow:0 0 12px rgba(201,162,39,.95); animation-duration:15s;"></span>
     <span style="left:48%; bottom:0; width:3px; height:3px; background:#F5E6C8; box-shadow:0 0 10px rgba(245,230,200,.8); animation-duration:19s; animation-delay:3.4s;"></span>
     <span style="left:69%; bottom:7%; width:4px; height:4px; background:#8B2635; box-shadow:0 0 12px rgba(139,38,53,1); animation-duration:17s; animation-delay:6.8s;"></span>
@@ -431,7 +440,7 @@
 </div>
 
 <div id="m-root">
-  <div class="m-bg"></div>
+  <div class="m-bg fallback-bg"></div>
   <header class="m-head">
     <div class="m-brand">
       <span class="m-title">Mausiqi</span>
@@ -456,7 +465,8 @@
 
   <div class="m-panel-body" id="m-panelBody">
     <button type="button" class="m-record" id="m-recordStack" aria-label="Show track list">
-      <svg viewBox="0 0 200 200" class="m-disc-svg">
+      <div id="m-scene" class="m-scene-slot"></div>
+      <svg viewBox="0 0 200 200" class="m-disc-svg fallback-bg">
         <defs>
           <radialGradient id="m-discShine" cx="35%" cy="30%" r="80%">
             <stop offset="0%" stop-color="#2c2836"/>
@@ -474,7 +484,7 @@
         <text x="100" y="114" text-anchor="middle" font-family="Amiri, serif" font-size="11" fill="#C9A227">موسیقی</text>
         <circle cx="100" cy="100" r="3" fill="#12131F"/>
       </svg>
-      <span class="m-disc-sheen"></span>
+      <span class="m-disc-sheen fallback-bg"></span>
       <span class="m-record-hint">Tap for tracks</span>
     </button>
     <div class="m-tracklist" id="m-trackList">
@@ -536,6 +546,278 @@
 </div>
 
 <div id="ytPlayerHidden"><div id="ytPlayer"></div></div>
+
+<script>
+// ============ Mausiqi 3D scene module (shared record + ambient background) ============
+window.mausiqi3D = { setPlaying: function(){} };
+(function(){
+  function hasWebGL(){
+    try{
+      const c = document.createElement('canvas');
+      return !!(window.WebGLRenderingContext && (c.getContext('webgl') || c.getContext('experimental-webgl')));
+    }catch(e){ return false; }
+  }
+  if(typeof THREE === 'undefined' || !hasWebGL()) return;
+
+  function makeVinylTexture(withText){
+    const S = 1024, cv = document.createElement('canvas');
+    cv.width = cv.height = S;
+    const ctx = cv.getContext('2d');
+    const cx = S/2, cy = S/2;
+    ctx.fillStyle = '#141219'; ctx.fillRect(0, 0, S, S);
+    for(let r = 150; r < 500; r += 2.2){
+      const a = 0.05 + Math.random()*0.10;
+      ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI*2);
+      ctx.strokeStyle = 'rgba(245,230,200,' + a.toFixed(3) + ')';
+      ctx.lineWidth = 0.8 + Math.random()*0.5;
+      ctx.stroke();
+    }
+    ctx.beginPath(); ctx.arc(cx, cy, 150, 0, Math.PI*2); ctx.fillStyle = '#191622'; ctx.fill();
+    ctx.beginPath(); ctx.arc(cx, cy, 138, 0, Math.PI*2);
+    const lab = ctx.createRadialGradient(cx-30, cy-34, 10, cx, cy, 140);
+    lab.addColorStop(0, '#A32E3F'); lab.addColorStop(0.65, '#8B2635'); lab.addColorStop(1, '#6D1D29');
+    ctx.fillStyle = lab; ctx.fill();
+    ctx.lineWidth = 3; ctx.strokeStyle = 'rgba(201,162,39,.8)';
+    ctx.beginPath(); ctx.arc(cx, cy, 138, 0, Math.PI*2); ctx.stroke();
+    if(withText){
+      ctx.textAlign = 'center'; ctx.fillStyle = '#F5E6C8';
+      ctx.font = '700 44px Amiri, serif'; ctx.fillText('Mausiqi', cx, cy - 18);
+      ctx.fillStyle = '#C9A227'; ctx.font = '400 34px Amiri, serif';
+      ctx.fillText('\u0645\u0648\u0633\u06cc\u0642\u06cc', cx, cy + 40);
+    }
+    ctx.beginPath(); ctx.arc(cx, cy, 9, 0, Math.PI*2); ctx.fillStyle = '#0c0b12'; ctx.fill();
+    const tex = new THREE.CanvasTexture(cv);
+    tex.anisotropy = 8;
+    return tex;
+  }
+
+  function makeGlowTexture(){
+    const s = 256, cv = document.createElement('canvas');
+    cv.width = cv.height = s;
+    const ctx = cv.getContext('2d');
+    const g = ctx.createRadialGradient(s/2, s/2, 0, s/2, s/2, s/2);
+    g.addColorStop(0, 'rgba(255,255,255,1)'); g.addColorStop(0.4, 'rgba(255,255,255,0.35)'); g.addColorStop(1, 'rgba(255,255,255,0)');
+    ctx.fillStyle = g; ctx.fillRect(0, 0, s, s);
+    return new THREE.CanvasTexture(cv);
+  }
+
+  const faceTex = makeVinylTexture(true);
+  const bumpTex = makeVinylTexture(false);
+  const glowTex = makeGlowTexture();
+  document.fonts && document.fonts.ready && document.fonts.ready.then(function(){
+    const fresh = makeVinylTexture(true);
+    instances.forEach(function(inst){ inst.faceMat.map = fresh; inst.faceMat.needsUpdate = true; });
+  });
+
+  const instances = [];
+
+  function createScene(container, opts){
+    opts = opts || {};
+    const isFullBg = !!opts.fullBackground;
+    const particleCount = opts.particleCount || 0;
+    const withOrbs = !!opts.withOrbs;
+    const withDrag = opts.withDrag !== false;
+    const onTap = opts.onTap || null;
+
+    const scene = new THREE.Scene();
+    const fov = 36;
+    const camera = new THREE.PerspectiveCamera(fov, 1, 0.1, 100);
+
+    const renderer = new THREE.WebGLRenderer({ antialias:true, alpha:true });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+    container.appendChild(renderer.domElement);
+
+    scene.add(new THREE.AmbientLight(0x36322c, 1.0));
+    const key = new THREE.DirectionalLight(0xfff2d8, 1.15); key.position.set(-4,7,6); scene.add(key);
+    const rim = new THREE.PointLight(0x8B2635, 1.4, 30); rim.position.set(6,1.5,4); scene.add(rim);
+    const brass = new THREE.PointLight(0xC9A227, 0.7, 25); brass.position.set(-6,-3,5); scene.add(brass);
+
+    const faceMat = new THREE.MeshPhongMaterial({ map: faceTex, bumpMap: bumpTex, bumpScale: 0.015, shininess: 68, specular: new THREE.Color(0x5a5348) });
+    const edgeMat = new THREE.MeshPhongMaterial({ color: 0x191722, shininess: 30, specular: 0x33302a });
+    const R = 4.4;
+    const geo = new THREE.CylinderGeometry(R, R, 0.14, 96);
+    const record = new THREE.Mesh(geo, [edgeMat, faceMat, faceMat]);
+    record.rotation.y = Math.PI / 2;
+
+    const tiltGroup = new THREE.Group();
+    tiltGroup.add(record);
+    scene.add(tiltGroup);
+    tiltGroup.rotation.x = 0.55;
+
+    // particles
+    let pGeo, pMat, particles, pPhase, pSpeed, spreadX = 9, spreadY = 5.5, spreadZ = [-6,3];
+    if(particleCount > 0){
+      if(!isFullBg){ spreadX = 3.4; spreadY = 3.4; spreadZ = [-3,1]; }
+      pGeo = new THREE.BufferGeometry();
+      const pos = new Float32Array(particleCount*3), col = new Float32Array(particleCount*3);
+      pPhase = new Float32Array(particleCount); pSpeed = new Float32Array(particleCount);
+      const palette = [[0.96,0.90,0.78],[0.79,0.64,0.15],[0.55,0.15,0.21]];
+      for(let i=0;i<particleCount;i++){
+        pos[i*3] = (Math.random()-0.5)*spreadX*2;
+        pos[i*3+1] = (Math.random()-0.5)*spreadY*2;
+        pos[i*3+2] = spreadZ[0] + Math.random()*(spreadZ[1]-spreadZ[0]);
+        const cSel = palette[Math.random()<0.62?0:(Math.random()<0.6?1:2)];
+        col[i*3]=cSel[0]; col[i*3+1]=cSel[1]; col[i*3+2]=cSel[2];
+        pPhase[i] = Math.random()*Math.PI*2;
+        pSpeed[i] = 0.0015 + Math.random()*0.003;
+      }
+      pGeo.setAttribute('position', new THREE.BufferAttribute(pos,3));
+      pGeo.setAttribute('color', new THREE.BufferAttribute(col,3));
+      pMat = new THREE.PointsMaterial({ size: isFullBg?0.055:0.045, vertexColors:true, transparent:true, opacity:0.75, depthWrite:false });
+      particles = new THREE.Points(pGeo, pMat);
+      scene.add(particles);
+    }
+
+    const orbs = [];
+    if(withOrbs){
+      const specs = [
+        {color:0x8B2635, scale:isFullBg?9:4, x:-6,y:2.5,z:-5, sp:0.00022},
+        {color:0xC9A227, scale:isFullBg?7:3.2, x:6,y:-2.0,z:-4, sp:0.00030},
+        {color:0x8B2635, scale:isFullBg?6:3, x:2,y:3.5,z:-6, sp:0.00026}
+      ];
+      specs.forEach(function(s){
+        const mat = new THREE.SpriteMaterial({ map:glowTex, color:s.color, transparent:true, opacity:0.14, blending:THREE.AdditiveBlending, depthWrite:false });
+        const spr = new THREE.Sprite(mat);
+        spr.position.set(s.x,s.y,s.z); spr.scale.setScalar(s.scale);
+        scene.add(spr);
+        orbs.push({spr:spr, baseX:s.x, baseY:s.y, sp:s.sp, phase:Math.random()*6});
+      });
+    }
+
+    const ripples = [];
+    function spawnRipple(){
+      const rgeo = new THREE.RingGeometry(R+0.1, R+0.24, 80);
+      const rmat = new THREE.MeshBasicMaterial({ color:0xC9A227, transparent:true, opacity:0.4, side:THREE.DoubleSide, blending:THREE.AdditiveBlending, depthWrite:false });
+      const ring = new THREE.Mesh(rgeo, rmat);
+      ring.rotation.x = -Math.PI/2;
+      tiltGroup.add(ring);
+      ripples.push({ring:ring, life:0});
+    }
+    let rippleTimer = 0;
+
+    let playing = false, spinVel = 0;
+    const BASE_SPIN = 0.02;
+    let targetTiltX = 0.55, targetTiltZ = 0;
+    let dragging = false, lastX = 0, lastY = 0, dragDist = 0;
+
+    function onDown(clientX, clientY){
+      if(!withDrag) return;
+      dragging = true; lastX = clientX; lastY = clientY; dragDist = 0;
+    }
+    function onMoveDrag(clientX, clientY){
+      if(!dragging) return;
+      const dx = clientX - lastX, dy = clientY - lastY;
+      dragDist += Math.abs(dx) + Math.abs(dy);
+      spinVel += dx * 0.0035;
+      lastX = clientX; lastY = clientY;
+    }
+    function onUp(){
+      if(!dragging) return;
+      dragging = false;
+      // if this was a genuine drag (not a simple tap), suppress the native click
+      // that's about to fire on the enclosing button, so spinning the record
+      // doesn't also toggle the track list open/closed.
+      if(dragDist >= 6 && onTap){
+        const suppress = function(e){ e.stopPropagation(); };
+        container.addEventListener('click', suppress, { capture:true, once:true });
+      }
+    }
+    if(withDrag){
+      container.style.cursor = 'grab';
+      container.addEventListener('mousedown', function(e){ onDown(e.clientX, e.clientY); });
+      window.addEventListener('mousemove', function(e){ onMoveDrag(e.clientX, e.clientY); });
+      window.addEventListener('mouseup', onUp);
+      container.addEventListener('touchstart', function(e){ const t=e.touches[0]; onDown(t.clientX, t.clientY); }, {passive:true});
+      container.addEventListener('touchmove', function(e){ const t=e.touches[0]; onMoveDrag(t.clientX, t.clientY); }, {passive:true});
+      container.addEventListener('touchend', onUp);
+    }
+
+    if(isFullBg){
+      window.addEventListener('mousemove', function(e){
+        const nx = e.clientX / window.innerWidth - 0.5;
+        const ny = e.clientY / window.innerHeight - 0.5;
+        targetTiltX = 0.55 + ny*0.22;
+        targetTiltZ = -nx*0.16;
+      });
+    }
+
+    function resize(){
+      const w = container.clientWidth, h = container.clientHeight;
+      if(w < 2 || h < 2) return;
+      renderer.setSize(w, h, false);
+      camera.aspect = w / h;
+      let targetPx;
+      if(isFullBg){
+        targetPx = Math.min(window.innerHeight * 0.72, window.innerWidth * 0.60);
+      } else {
+        targetPx = h * 0.94;
+      }
+      const fovRad = fov * Math.PI / 180;
+      const dist = (R * h) / (targetPx * Math.tan(fovRad/2));
+      camera.position.set(0, 0, dist);
+      camera.lookAt(0,0,0);
+      camera.updateProjectionMatrix();
+    }
+    resize();
+    window.addEventListener('resize', resize);
+
+    let t = 0;
+    function animate(){
+      requestAnimationFrame(animate);
+      if(container.clientWidth < 1) return;
+      t += 0.016;
+      spinVel *= 0.965;
+      record.rotation.y += spinVel + (playing ? BASE_SPIN : 0);
+      tiltGroup.rotation.x += (targetTiltX - tiltGroup.rotation.x) * 0.06;
+      tiltGroup.rotation.z += (targetTiltZ - tiltGroup.rotation.z) * 0.06;
+
+      if(particles){
+        const pos = pGeo.attributes.position.array;
+        for(let i=0;i<particleCount;i++){
+          pos[i*3+1] += pSpeed[i];
+          pos[i*3] += Math.sin(t*0.6 + pPhase[i]) * 0.0012;
+          if(pos[i*3+1] > spreadY){ pos[i*3+1] = -spreadY; pos[i*3] = (Math.random()-0.5)*spreadX*2; }
+        }
+        pGeo.attributes.position.needsUpdate = true;
+        pMat.opacity = 0.55 + Math.sin(t*0.8)*0.15;
+      }
+      orbs.forEach(function(o){
+        o.spr.position.x = o.baseX + Math.sin(t*o.sp*900 + o.phase)*1.2;
+        o.spr.position.y = o.baseY + Math.cos(t*o.sp*700 + o.phase)*0.8;
+      });
+      if(playing){
+        rippleTimer += 0.016;
+        if(rippleTimer > 1.4){ rippleTimer = 0; spawnRipple(); }
+      }
+      for(let i=ripples.length-1;i>=0;i--){
+        const r = ripples[i]; r.life += 0.016;
+        const k = r.life/2.2;
+        r.ring.scale.setScalar(1 + k*1.6);
+        r.ring.material.opacity = 0.4*(1-k);
+        if(k>=1){ tiltGroup.remove(r.ring); r.ring.geometry.dispose(); r.ring.material.dispose(); ripples.splice(i,1); }
+      }
+      renderer.render(scene, camera);
+    }
+    animate();
+
+    const inst = { faceMat: faceMat, setPlaying: function(p){ playing = p; } };
+    instances.push(inst);
+    return inst;
+  }
+
+  document.body.classList.add('has-webgl3d');
+
+  const gScene = document.getElementById('g-scene');
+  const mScene = document.getElementById('m-scene');
+  const gInst = gScene ? createScene(gScene, { fullBackground:true, particleCount:320, withOrbs:true, withDrag:true }) : null;
+  const mInst = mScene ? createScene(mScene, { fullBackground:false, particleCount:50, withOrbs:false, withDrag:true, onTap:true }) : null;
+
+  window.mausiqi3D.setPlaying = function(p){
+    if(gInst) gInst.setPlaying(p);
+    if(mInst) mInst.setPlaying(p);
+  };
+})();
+</script>
 
 <script>
 (function(){
@@ -827,6 +1109,7 @@
     document.body.classList.toggle('is-playing', playing);
     playPauseBtn.innerHTML = playing ? '&#10074;&#10074;' : '&#9654;';
     statusLabel.textContent = playing ? 'Now playing' : 'Paused';
+    if(window.mausiqi3D) window.mausiqi3D.setPlaying(playing);
   }
 
   function playTrack(i){
