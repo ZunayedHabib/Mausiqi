@@ -69,10 +69,25 @@
   .g-nav-dash{ width:16px; height:1px; background:rgba(245,230,200,.28); transition:width .25s, background .25s; flex-shrink:0; }
   .g-nav-item.active .g-nav-dash{ width:38px; background:#C9A227; }
   .g-nav-remove{ margin-left:auto; opacity:0; background:none; border:none; color:rgba(245,230,200,.4); font-size:11px; cursor:pointer; padding:0 4px; }
+  .g-nav-edit{ margin-left:auto; opacity:0; background:none; border:none; color:rgba(245,230,200,.4); font-size:11px; cursor:pointer; padding:0 4px; }
+  .g-nav-item:hover .g-nav-edit{ opacity:1; }
+  .g-nav-edit:hover{ color:#C9A227; }
   .g-nav-item:hover .g-nav-remove{ opacity:1; }
   .g-nav-remove:hover{ color:#C9A227; }
   .g-nav-add{ display:flex; align-items:center; gap:11px; margin-top:6px; padding:9px 0; border:none; background:transparent; color:rgba(245,230,200,.42); font-family:'Work Sans',sans-serif; font-size:11px; letter-spacing:.2em; text-transform:uppercase; cursor:pointer; transition:color .2s; }
   .g-nav-add:hover{ color:#C9A227; }
+  .g-search-wrap{ position:relative; margin-bottom:10px; }
+  .g-search-input{ width:190px; background:rgba(10,10,17,.55); border:1px solid rgba(245,230,200,.18); border-radius:14px; padding:8px 12px; color:#F5E6C8; font-family:'Work Sans',sans-serif; font-size:12px; outline:none; }
+  .g-search-input:focus{ border-color:#C9A227; }
+  .g-search-input::placeholder{ color:rgba(245,230,200,.35); }
+  .g-search-results{ display:none; position:absolute; top:calc(100% + 6px); left:0; width:280px; max-height:280px; overflow-y:auto; z-index:20;
+    background:rgba(10,10,17,.92); backdrop-filter:blur(10px); border:1px solid rgba(201,162,39,.3); border-radius:8px; padding:6px; }
+  .g-search-results.open{ display:block; }
+  .g-search-result{ display:flex; flex-direction:column; gap:2px; padding:8px 10px; border-radius:4px; cursor:pointer; }
+  .g-search-result:hover{ background:rgba(201,162,39,.14); }
+  .g-search-result-title{ font-family:'Amiri',serif; font-size:14px; color:#F5E6C8; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .g-search-result-meta{ font-size:10px; letter-spacing:.08em; text-transform:uppercase; color:#C9A227; }
+  .g-search-empty{ padding:10px; font-size:12px; color:rgba(245,230,200,.45); text-align:center; }
 
   .g-add-form{ display:none; flex-direction:column; gap:6px; margin-top:8px; }
   .g-add-form.open{ display:flex; }
@@ -229,6 +244,11 @@
     .m-count{ font-size:10px; letter-spacing:.18em; text-transform:uppercase; color:rgba(245,230,200,.45); }
 
     .m-nav-wrap{ position:relative; z-index:2; padding:0 16px 4px; }
+    .m-search-wrap{ position:relative; z-index:5; padding:6px 16px 0; }
+    .m-search-input{ width:100%; background:rgba(10,10,17,.55); border:1px solid rgba(245,230,200,.18); border-radius:16px; padding:9px 14px; color:#F5E6C8; font-family:'Work Sans',sans-serif; font-size:13px; outline:none; }
+    .m-search-input:focus{ border-color:#C9A227; }
+    .m-search-input::placeholder{ color:rgba(245,230,200,.35); }
+    .m-search-results{ width:auto; left:16px; right:16px; }
     .m-nav{ display:flex; gap:8px; overflow-x:auto; padding-bottom:6px; scrollbar-width:none; -webkit-overflow-scrolling:touch; }
     .m-nav::-webkit-scrollbar{ display:none; }
     #m-root .g-nav-item{ flex:0 0 auto; display:flex; align-items:center; gap:6px;
@@ -238,6 +258,7 @@
     #m-root .g-nav-item.active{ background:#C9A227; color:#12131F; border-color:#C9A227; font-weight:600; }
     #m-root .g-nav-item .g-nav-dash{ display:none; }
     #m-root .g-nav-item .g-nav-remove{ opacity:.7; margin-left:2px; font-size:12px; padding:0 2px; background:none; border:none; color:inherit; }
+    #m-root .g-nav-item .g-nav-edit{ opacity:.7; margin-left:2px; font-size:12px; padding:0 2px; background:none; border:none; color:inherit; }
     .m-add-pill{ flex:0 0 auto; width:34px; height:34px; border-radius:50%; border:1px dashed rgba(201,162,39,.5);
       background:transparent; color:#C9A227; font-size:16px; cursor:pointer; display:flex; align-items:center; justify-content:center; }
     .m-add-form{ display:none; flex-direction:column; gap:6px; padding-top:6px; }
@@ -339,6 +360,10 @@
     </div>
 
     <div class="g-nav" id="gNav">
+      <div class="g-search-wrap">
+        <input type="text" id="searchInput" class="g-search-input" placeholder="Search any playlist…" autocomplete="off">
+        <div class="g-search-results" id="searchResults"></div>
+      </div>
       <!-- playlist nav items injected here -->
       <button type="button" class="g-nav-add" id="addPlaylistToggle">
         <span class="g-nav-dash" style="width:14px;"></span>Add playlist
@@ -451,6 +476,11 @@
     </div>
     <span class="m-count" id="m-panelCount"></span>
   </header>
+
+  <div class="m-search-wrap">
+    <input type="text" id="m-searchInput" class="m-search-input" placeholder="Search any playlist…" autocomplete="off">
+    <div class="g-search-results m-search-results" id="m-searchResults"></div>
+  </div>
 
   <div class="m-nav-wrap">
     <div class="m-nav" id="m-gNav">
@@ -825,12 +855,17 @@ window.mausiqi3D = { setPlaying: function(){} };
   // ---- SITE OWNER: real key already set below ----
   const SITE_API_KEY = "AIzaSyC7eCXVmSldjiW34uNZ0QlpO_zF1J9lx-k";
   const PLAYLISTS_STORAGE = 'mausiqi-playlists';
+  const PREFS_STORAGE = 'mausiqi-prefs';
+  const RESUME_STORAGE = 'mausiqi-resume';
 
   let apiKey = SITE_API_KEY;
   let playlists = [];
+  let playlistTracksCache = {};
   let activePlaylistIndex = 0;
   let tracks = [];
   let currentIndex = -1;
+  let playingPlaylistId = null;
+  let playingTracks = [];
   let player = null;
   let playerReady = false;
   let isPlaying = false;
@@ -854,6 +889,8 @@ window.mausiqi3D = { setPlaying: function(){} };
   const hideTracksBtn = $id('hideTracksBtn');
   const panelToggle = $id('panelToggle');
   const recordStack = $id('recordStack');
+  const searchInput = $id('searchInput');
+  const searchResults = $id('searchResults');
   const shuffleBtn = $id('shuffleBtn');
   const repeatBtn = $id('repeatBtn');
   const prevBtn = $id('prevBtn');
@@ -915,11 +952,46 @@ window.mausiqi3D = { setPlaying: function(){} };
         volume = (i + 1) * 10;
         if(player && player.setVolume) player.setVolume(volume);
         renderVolumeBars();
+        savePrefs();
       });
       volumeBars.appendChild(b);
     }
   }
+  loadPrefs();
   renderVolumeBars();
+  shuffleBtn.classList.toggle('on', shuffleOn);
+  repeatBtn.classList.toggle('on', repeatMode !== 'off');
+  $id('repeatBadge').classList.toggle('visible', repeatMode === 'one');
+
+  function loadPrefs(){
+    try{
+      const raw = localStorage.getItem(PREFS_STORAGE);
+      if(!raw) return;
+      const p = JSON.parse(raw);
+      if(typeof p.volume === 'number') volume = p.volume;
+      if(typeof p.shuffleOn === 'boolean') shuffleOn = p.shuffleOn;
+      if(p.repeatMode === 'off' || p.repeatMode === 'all' || p.repeatMode === 'one') repeatMode = p.repeatMode;
+    }catch(e){}
+  }
+  function savePrefs(){
+    try{ localStorage.setItem(PREFS_STORAGE, JSON.stringify({ volume, shuffleOn, repeatMode })); }
+    catch(e){}
+  }
+
+  function saveResumeState(){
+    if(!playingPlaylistId || currentIndex === -1 || !playingTracks[currentIndex]) return;
+    try{
+      const cur = (player && player.getCurrentTime) ? player.getCurrentTime() : 0;
+      localStorage.setItem(RESUME_STORAGE, JSON.stringify({
+        playlistId: playingPlaylistId,
+        trackId: playingTracks[currentIndex].id,
+        elapsed: cur || 0
+      }));
+    }catch(e){}
+  }
+  function clearResumeState(){
+    try{ localStorage.removeItem(RESUME_STORAGE); }catch(e){}
+  }
 
   // ---- Playlists (localStorage) ----
   function loadPlaylists(){
@@ -934,8 +1006,14 @@ window.mausiqi3D = { setPlaying: function(){} };
   }
 
   addPlaylistToggle.addEventListener('click', () => {
-    addPlaylistForm.classList.toggle('open');
-    if(addPlaylistForm.classList.contains('open')) playlistLinkInput.focus();
+    if(!addPlaylistForm.classList.contains('open')){
+      resetAddForm();
+      addPlaylistForm.classList.add('open');
+      playlistLinkInput.focus();
+    } else {
+      addPlaylistForm.classList.remove('open');
+      resetAddForm();
+    }
   });
 
   addPlaylistBtn.addEventListener('click', async () => {
@@ -947,22 +1025,39 @@ window.mausiqi3D = { setPlaying: function(){} };
       addStatus.classList.add('error');
       return;
     }
-    if(playlists.some(p => p.id === id)){
+    const editingPlaylistIndex = editingPlaylistId !== null ? playlists.findIndex(p => p.id === editingPlaylistId) : -1;
+    const isEditing = editingPlaylistIndex !== -1;
+    const dupIndex = playlists.findIndex(p => p.id === id);
+    if(dupIndex !== -1 && dupIndex !== editingPlaylistIndex){
       addStatus.textContent = "Already added.";
       addStatus.classList.add('error');
       return;
     }
     addStatus.classList.remove('error');
-    const name = playlistNameInput.value.trim() || ('Playlist ' + (playlists.length + 1));
-    playlists.push({ name, id });
-    savePlaylists();
-    activePlaylistIndex = playlists.length - 1;
-    renderNav();
-    playlistNameInput.value = '';
-    playlistLinkInput.value = '';
-    addStatus.textContent = `Added "${name}"`;
-    addPlaylistForm.classList.remove('open');
-    loadActivePlaylist();
+    const name = playlistNameInput.value.trim() || (isEditing ? playlists[editingPlaylistIndex].name : ('Playlist ' + (playlists.length + 1)));
+
+    if(isEditing){
+      const oldId = playlists[editingPlaylistIndex].id;
+      playlists[editingPlaylistIndex] = { name, id };
+      if(oldId !== id) delete playlistTracksCache[oldId];
+      else delete playlistTracksCache[id]; // link may point at same id but force a fresh fetch just in case
+      savePlaylists();
+      activePlaylistIndex = editingPlaylistIndex;
+      renderNav();
+      addStatus.textContent = `Saved "${name}"`;
+      addPlaylistForm.classList.remove('open');
+      resetAddForm();
+      loadActivePlaylist();
+    } else {
+      playlists.push({ name, id });
+      savePlaylists();
+      activePlaylistIndex = playlists.length - 1;
+      renderNav();
+      addStatus.textContent = `Added "${name}"`;
+      addPlaylistForm.classList.remove('open');
+      resetAddForm();
+      loadActivePlaylist();
+    }
   });
 
   function renderNav(){
@@ -972,24 +1067,77 @@ window.mausiqi3D = { setPlaying: function(){} };
       const btn = document.createElement('button');
       btn.type = 'button';
       btn.className = 'g-nav-item' + (i === activePlaylistIndex ? ' active' : '');
-      btn.innerHTML = `<span class="g-nav-dash"></span><span>${escapeHtml(pl.name)}</span><span class="g-nav-remove">&times;</span>`;
+      btn.innerHTML = `<span class="g-nav-dash"></span><span>${escapeHtml(pl.name)}</span><span class="g-nav-edit" title="Edit playlist">&#9998;</span><span class="g-nav-remove">&times;</span>`;
       btn.addEventListener('click', (e) => {
-        if(e.target.closest('.g-nav-remove')) return;
+        if(e.target.closest('.g-nav-remove') || e.target.closest('.g-nav-edit')) return;
         activePlaylistIndex = i;
-        currentIndex = -1;
         renderNav();
         loadActivePlaylist();
       });
       btn.querySelector('.g-nav-remove').addEventListener('click', (e) => {
         e.stopPropagation();
+        const removedId = pl.id;
+        const activeId = playlists[activePlaylistIndex] ? playlists[activePlaylistIndex].id : null;
         playlists.splice(i, 1);
-        if(activePlaylistIndex >= playlists.length){ activePlaylistIndex = Math.max(0, playlists.length - 1); }
+        delete playlistTracksCache[removedId];
+        if(activeId !== null && activeId !== removedId){
+          // re-find the same logical playlist by id - immune to index shifting
+          const stillIdx = playlists.findIndex(p => p.id === activeId);
+          activePlaylistIndex = stillIdx !== -1 ? stillIdx : Math.max(0, playlists.length - 1);
+        } else {
+          activePlaylistIndex = Math.max(0, Math.min(activePlaylistIndex, playlists.length - 1));
+        }
         savePlaylists();
         renderNav();
         loadActivePlaylist();
       });
+      btn.querySelector('.g-nav-edit').addEventListener('click', (e) => {
+        e.stopPropagation();
+        openEditForm(i);
+      });
       gNav.insertBefore(btn, addPlaylistToggle);
     });
+  }
+
+  let editingPlaylistId = null;
+  function openEditForm(i){
+    editingPlaylistId = playlists[i].id;
+    const pl = playlists[i];
+    playlistNameInput.value = pl.name;
+    playlistLinkInput.value = pl.id;
+    addPlaylistBtn.textContent = 'Save';
+    addStatus.textContent = '';
+    addStatus.classList.remove('error');
+    addPlaylistForm.classList.add('open');
+    playlistNameInput.focus();
+  }
+  function resetAddForm(){
+    editingPlaylistId = null;
+    addPlaylistBtn.textContent = 'Add';
+    playlistNameInput.value = '';
+    playlistLinkInput.value = '';
+  }
+
+  async function fetchPlaylistTracks(pl){
+    if(playlistTracksCache[pl.id]) return playlistTracksCache[pl.id];
+    let pageToken = ''; let all = [];
+    do {
+      const res = await fetch(`https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&maxResults=50&playlistId=${pl.id}&pageToken=${pageToken}&key=${apiKey}`);
+      if(!res.ok) throw new Error('YouTube API error: ' + res.status);
+      const data = await res.json();
+      all = all.concat(data.items || []);
+      pageToken = data.nextPageToken || '';
+    } while(pageToken);
+
+    const parsed = all
+      .filter(item => item.snippet && item.snippet.resourceId && item.snippet.resourceId.videoId && item.snippet.title !== 'Private video' && item.snippet.title !== 'Deleted video')
+      .map(item => ({
+        id: item.snippet.resourceId.videoId,
+        title: item.snippet.title,
+        channel: item.snippet.videoOwnerChannelTitle || item.snippet.channelTitle || 'YouTube'
+      }));
+    playlistTracksCache[pl.id] = parsed;
+    return parsed;
   }
 
   async function loadActivePlaylist(){
@@ -1003,26 +1151,10 @@ window.mausiqi3D = { setPlaying: function(){} };
     const pl = playlists[activePlaylistIndex];
     if(!pl) return;
     panelName.textContent = pl.name;
-    panelCount.textContent = 'Loading…';
+    panelCount.textContent = playlistTracksCache[pl.id] ? (playlistTracksCache[pl.id].length + ' tracks') : 'Loading…';
     tracks = [];
     try{
-      let pageToken = ''; let all = [];
-      do {
-        const res = await fetch(`https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&maxResults=50&playlistId=${pl.id}&pageToken=${pageToken}&key=${apiKey}`);
-        if(!res.ok) throw new Error('YouTube API error: ' + res.status);
-        const data = await res.json();
-        all = all.concat(data.items || []);
-        pageToken = data.nextPageToken || '';
-      } while(pageToken);
-
-      tracks = all
-        .filter(item => item.snippet && item.snippet.resourceId && item.snippet.resourceId.videoId && item.snippet.title !== 'Private video' && item.snippet.title !== 'Deleted video')
-        .map(item => ({
-          id: item.snippet.resourceId.videoId,
-          title: item.snippet.title,
-          channel: item.snippet.videoOwnerChannelTitle || item.snippet.channelTitle || 'YouTube'
-        }));
-
+      tracks = await fetchPlaylistTracks(pl);
       panelCount.textContent = tracks.length + (tracks.length === 1 ? ' track' : ' tracks');
       renderTrackList();
     }catch(e){
@@ -1049,16 +1181,17 @@ window.mausiqi3D = { setPlaying: function(){} };
       return;
     }
     tracks.forEach((track, i) => {
+      const isPlayingRow = playlists[activePlaylistIndex] && playlists[activePlaylistIndex].id === playingPlaylistId && (i === currentIndex);
       const row = document.createElement('button');
       row.type = 'button';
-      row.className = 'g-track' + (i === currentIndex ? ' active' : '');
+      row.className = 'g-track' + (isPlayingRow ? ' active' : '');
       row.innerHTML = `
         <span style="display:flex; flex-direction:column; gap:2px; min-width:0;">
           <span class="g-track-title">${escapeHtml(track.title)}</span>
           <span class="g-track-artist">${escapeHtml(track.channel)}</span>
         </span>
         <span class="g-track-eq"><i></i><i></i><i></i></span>
-        <span class="g-track-len">${i === currentIndex ? '' : ''}</span>
+        <span class="g-track-len">${isPlayingRow ? '' : ''}</span>
       `;
       row.addEventListener('click', () => playTrack(i));
       trackRowsEl.appendChild(row);
@@ -1075,7 +1208,7 @@ window.mausiqi3D = { setPlaying: function(){} };
       height: '1', width: '1', videoId: '',
       playerVars: { 'playsinline': 1, 'controls': 0 },
       events: {
-        'onReady': () => { playerReady = true; if(player.setVolume) player.setVolume(volume); },
+        'onReady': () => { playerReady = true; if(player.setVolume) player.setVolume(volume); tryRestoreResume(); },
         'onStateChange': onPlayerStateChange
       }
     });
@@ -1084,13 +1217,61 @@ window.mausiqi3D = { setPlaying: function(){} };
   ytTag.src = "https://www.youtube.com/iframe_api";
   document.head.appendChild(ytTag);
 
+  async function tryRestoreResume(){
+    try{
+      const raw = localStorage.getItem(RESUME_STORAGE);
+      if(!raw) return;
+      const r = JSON.parse(raw);
+      if(!r || !r.playlistId || !r.trackId) return;
+      const plIdx = playlists.findIndex(p => p.id === r.playlistId);
+      if(plIdx === -1) return;
+      const pl = playlists[plIdx];
+      const trs = await fetchPlaylistTracks(pl);
+      const trackIdx = trs.findIndex(t => t.id === r.trackId);
+      if(trackIdx === -1) return;
+
+      activePlaylistIndex = plIdx;
+      tracks = trs;
+      panelName.textContent = pl.name;
+      panelCount.textContent = trs.length + (trs.length === 1 ? ' track' : ' tracks');
+      renderNav();
+
+      playingPlaylistId = pl.id;
+      playingTracks = trs;
+      currentIndex = trackIdx;
+      const track = trs[trackIdx];
+      nowTitle.textContent = track.title;
+      statusLabel.textContent = 'Paused';
+      renderTrackList();
+
+      if('mediaSession' in navigator){
+        navigator.mediaSession.metadata = new MediaMetadata({
+          title: track.title, artist: track.channel, album: 'Mausiqi',
+          artwork: [
+            { src: `https://img.youtube.com/vi/${track.id}/mqdefault.jpg`, sizes: '320x180', type: 'image/jpeg' },
+            { src: `https://img.youtube.com/vi/${track.id}/hqdefault.jpg`, sizes: '480x360', type: 'image/jpeg' }
+          ]
+        });
+        navigator.mediaSession.playbackState = 'paused';
+      }
+
+      pendingResumeSeek = r.elapsed > 0 ? r.elapsed : null;
+      player.cueVideoById(track.id);
+    }catch(e){}
+  }
+
+  let pendingResumeSeek = null;
   function onPlayerStateChange(event){
     if(event.data === YT.PlayerState.ENDED){
-      if(repeatMode === 'one'){ playTrack(currentIndex); }
+      if(repeatMode === 'one'){ playIndexInPlayingContext(currentIndex); }
       else { goNext(); }
     }
     if(event.data === YT.PlayerState.PLAYING){ setPlayingState(true); }
     if(event.data === YT.PlayerState.PAUSED){ setPlayingState(false); }
+    if(event.data === YT.PlayerState.CUED && pendingResumeSeek != null){
+      player.seekTo(pendingResumeSeek, true);
+      pendingResumeSeek = null;
+    }
   }
 
   function setPlayingState(playing){
@@ -1099,14 +1280,29 @@ window.mausiqi3D = { setPlaying: function(){} };
     playPauseBtn.innerHTML = playing ? '&#10074;&#10074;' : '&#9654;';
     statusLabel.textContent = playing ? 'Now playing' : 'Paused';
     if(window.mausiqi3D) window.mausiqi3D.setPlaying(playing);
+    if('mediaSession' in navigator) navigator.mediaSession.playbackState = playing ? 'playing' : 'paused';
   }
 
-  function playTrack(i){
-    if(i < 0 || i >= tracks.length) return;
+  // Plays index i within whatever is CURRENTLY the playing context (playingTracks).
+  // Used for auto-advance/repeat, where playback must continue in the list that's
+  // actually playing, regardless of what the user is currently browsing/displaying.
+  function playIndexInPlayingContext(i){
+    if(i < 0 || i >= playingTracks.length) return;
     currentIndex = i;
-    const track = tracks[i];
+    const track = playingTracks[i];
     nowTitle.textContent = track.title;
-    renderTrackList();
+    if('mediaSession' in navigator){
+      navigator.mediaSession.metadata = new MediaMetadata({
+        title: track.title,
+        artist: track.channel,
+        album: 'Mausiqi',
+        artwork: [
+          { src: `https://img.youtube.com/vi/${track.id}/mqdefault.jpg`, sizes: '320x180', type: 'image/jpeg' },
+          { src: `https://img.youtube.com/vi/${track.id}/hqdefault.jpg`, sizes: '480x360', type: 'image/jpeg' }
+        ]
+      });
+    }
+    if(playlists[activePlaylistIndex] && playlists[activePlaylistIndex].id === playingPlaylistId) renderTrackList();
     if(playerReady && player && player.loadVideoById){
       player.loadVideoById(track.id);
     } else {
@@ -1116,38 +1312,133 @@ window.mausiqi3D = { setPlaying: function(){} };
     }
   }
 
+  // Called when the user explicitly picks a track from the currently DISPLAYED
+  // list (a row click, or a search result). This is what actually changes
+  // which playlist is "playing" - browsing playlists alone never does.
+  function playTrack(i){
+    if(i < 0 || i >= tracks.length) return;
+    playingPlaylistId = playlists[activePlaylistIndex] ? playlists[activePlaylistIndex].id : null;
+    playingTracks = tracks;
+    playIndexInPlayingContext(i);
+  }
+
+  // ---- Cross-playlist search: finds a track in ANY saved playlist, switches
+  // context to that playlist, and plays it. Playback then continues normally
+  // within that playlist once the track ends, since currentIndex/tracks now
+  // correctly point at the new active playlist. ----
+  let searchDebounce = null;
+  function closeSearchResults(){
+    searchResults.classList.remove('open');
+    searchResults.innerHTML = '';
+  }
+  function playSearchResult(playlistId, trackId){
+    const playlistIdx = playlists.findIndex(p => p.id === playlistId);
+    if(playlistIdx === -1) return; // playlist was removed since the results were shown
+    activePlaylistIndex = playlistIdx;
+    const pl = playlists[playlistIdx];
+    tracks = playlistTracksCache[pl.id] || [];
+    const trackIdx = tracks.findIndex(t => t.id === trackId);
+    if(trackIdx === -1) return; // track list changed since the results were shown
+    panelName.textContent = pl.name;
+    panelCount.textContent = tracks.length + (tracks.length === 1 ? ' track' : ' tracks');
+    renderNav();
+    renderTrackList();
+    playTrack(trackIdx);
+    if(player && player.playVideo) player.playVideo();
+    searchInput.value = '';
+    closeSearchResults();
+  }
+  function renderSearchResults(query, resultsByPlaylist){
+    searchResults.innerHTML = '';
+    let total = 0;
+    resultsByPlaylist.forEach(function(group){
+      group.matches.forEach(function(m){
+        total++;
+        const row = document.createElement('div');
+        row.className = 'g-search-result';
+        row.innerHTML = `<span class="g-search-result-title">${escapeHtml(m.track.title)}</span><span class="g-search-result-meta">${escapeHtml(group.pl.name)}</span>`;
+        row.addEventListener('click', () => playSearchResult(group.pl.id, m.track.id));
+        searchResults.appendChild(row);
+      });
+    });
+    if(total === 0){
+      searchResults.innerHTML = `<div class="g-search-empty">No tracks match "${escapeHtml(query)}"</div>`;
+    }
+    searchResults.classList.add('open');
+  }
+  async function runSearch(query){
+    if(playlists.length === 0) return;
+    searchResults.innerHTML = '<div class="g-search-empty">Searching…</div>';
+    searchResults.classList.add('open');
+    // make sure every playlist's tracks are cached before searching
+    await Promise.all(playlists.map(pl => fetchPlaylistTracks(pl).catch(() => [])));
+    // query could have changed/cleared while fetching - bail if so
+    if(searchInput.value.trim().toLowerCase() !== query) return;
+    const q = query;
+    const resultsByPlaylist = playlists.map((pl) => {
+      const list = playlistTracksCache[pl.id] || [];
+      const matches = [];
+      list.forEach((track, index) => {
+        if(track.title.toLowerCase().includes(q)) matches.push({ track, index });
+      });
+      return { pl, matches };
+    }).filter(group => group.matches.length > 0);
+    renderSearchResults(query, resultsByPlaylist);
+  }
+  searchInput.addEventListener('input', () => {
+    const q = searchInput.value.trim().toLowerCase();
+    clearTimeout(searchDebounce);
+    if(q.length < 2){ closeSearchResults(); return; }
+    searchDebounce = setTimeout(() => runSearch(q), 350);
+  });
+  document.addEventListener('click', (e) => {
+    if(!searchResults.contains(e.target) && e.target !== searchInput) closeSearchResults();
+  });
+
   function pickNextIndex(direction){
-    if(tracks.length === 0) return -1;
+    if(playingTracks.length === 0) return -1;
     if(shuffleOn){
-      if(tracks.length === 1) return 0;
+      if(playingTracks.length === 1) return 0;
       let next;
-      do { next = Math.floor(Math.random() * tracks.length); } while(next === currentIndex);
+      do { next = Math.floor(Math.random() * playingTracks.length); } while(next === currentIndex);
       return next;
     }
     let next = currentIndex + direction;
-    if(next >= tracks.length){ return repeatMode === 'all' ? 0 : -1; }
-    if(next < 0){ return repeatMode === 'all' ? tracks.length - 1 : -1; }
+    if(next >= playingTracks.length){ return repeatMode === 'all' ? 0 : -1; }
+    if(next < 0){ return repeatMode === 'all' ? playingTracks.length - 1 : -1; }
     return next;
   }
   function goNext(){
     const next = pickNextIndex(1);
     if(next === -1){ player && player.pauseVideo && player.pauseVideo(); return; }
-    playTrack(next);
+    playIndexInPlayingContext(next);
   }
   function goPrev(){
     const prev = pickNextIndex(-1);
     if(prev === -1) return;
-    playTrack(prev);
+    playIndexInPlayingContext(prev);
+  }
+
+  if('mediaSession' in navigator){
+    navigator.mediaSession.setActionHandler('play', () => { if(player && player.playVideo) player.playVideo(); });
+    navigator.mediaSession.setActionHandler('pause', () => { if(player && player.pauseVideo) player.pauseVideo(); });
+    navigator.mediaSession.setActionHandler('previoustrack', goPrev);
+    navigator.mediaSession.setActionHandler('nexttrack', goNext);
+    navigator.mediaSession.setActionHandler('seekto', (details) => {
+      if(player && player.seekTo && details.seekTime != null) player.seekTo(details.seekTime, true);
+    });
   }
 
   shuffleBtn.addEventListener('click', () => {
     shuffleOn = !shuffleOn;
     shuffleBtn.classList.toggle('on', shuffleOn);
+    savePrefs();
   });
   repeatBtn.addEventListener('click', () => {
     repeatMode = repeatMode === 'off' ? 'all' : (repeatMode === 'all' ? 'one' : 'off');
     repeatBtn.classList.toggle('on', repeatMode !== 'off');
     $id('repeatBadge').classList.toggle('visible', repeatMode === 'one');
+    savePrefs();
   });
 
   playPauseBtn.addEventListener('click', () => {
@@ -1192,8 +1483,12 @@ window.mausiqi3D = { setPlaying: function(){} };
       if(dur > 0){
         setNeedleProgress(cur / dur);
         elapsedTime.textContent = fmtTime(cur) + ' / ' + fmtTime(dur);
+        if('mediaSession' in navigator && navigator.mediaSession.setPositionState){
+          try{ navigator.mediaSession.setPositionState({ duration: dur, playbackRate: 1, position: Math.min(cur, dur) }); }catch(e){}
+        }
       }
     }catch(e){}
+    saveResumeState();
   }, 500);
 
   loadPlaylists();
